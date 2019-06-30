@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestSitemapIndexVersion(t *testing.T) {
+func TestSitemapIndexParser(t *testing.T) {
 	sitemapIndexXML := `
 <?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/siteindex.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -21,6 +21,23 @@ func TestSitemapIndexVersion(t *testing.T) {
     <lastmod>2019-04-14T15::42:18+09:00</lastmod>
   </sitemap>
 </sitemapindex>`
+
+	urls, isSitemapIndex, err := parser(sitemapIndexXML)
+
+	if isSitemapIndex == false {
+		t.Error("invalid parse: this string is sitemap index.")
+	}
+
+	if len(urls) == 0 {
+		t.Error("invalid parse: url must be.")
+	}
+
+	if err != nil {
+		t.Error("invalid parse: error should not to be.")
+	}
+}
+
+func TestSitemapParser(t *testing.T) {
 	sitemapXML := `
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -50,17 +67,17 @@ func TestSitemapIndexVersion(t *testing.T) {
   </url>
 </urlset>`
 
-	t.Error("fail")
-}
+	urls, isSitemapIndex, err := parser(sitemapXML)
 
-func TestSitemapVersion(t *testing.T) {
-	t.Error("fail")
-}
+	if isSitemapIndex == true {
+		t.Error("invalid parse: this string is not sitemap index.")
+	}
 
-func TestGzippedVersion(t *testing.T) {
-	t.Error("fail")
-}
+	if len(urls) == 0 {
+		t.Error("invalid parse: url must be.")
+	}
 
-func TestNotGzippedVersion(t *testing.T) {
-	t.Error("fail")
+	if err != nil {
+		t.Error("invalid parse: error should not to be.")
+	}
 }
