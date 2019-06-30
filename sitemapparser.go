@@ -3,11 +3,10 @@ package sitemapparser
 import (
 	"bytes"
 	"compress/gzip"
+	"errors"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/beevik/etree"
 )
@@ -46,7 +45,7 @@ func scheduler(url string) ([]string, error) {
 }
 
 func downloader(url string) (string, error) {
-	fmt.Println(url)
+	log.Printf("start download: %s", url)
 
 	client := new(http.Client)
 
@@ -74,13 +73,6 @@ func downloader(url string) (string, error) {
 		return "", err
 	}
 	defer reader.Close()
-	_, errs := io.Copy(os.Stdout, reader)
-
-	if errs != nil {
-		log.SetFlags(log.Lshortfile)
-		log.Fatal(err)
-		return "", err
-	}
 
 	out := bytes.Buffer{}
 	out.ReadFrom(reader)
@@ -99,16 +91,20 @@ func parser(sitemapXML string) ([]string, bool, error) {
 		log.Fatal(err)
 		return nil, isSitemapIndex, err
 	}
-	set := doc.SelectElement("sitemapindex")
+	sitemapSet := doc.SelectElement("sitemapindex")
+	urlSet := doc.SelectElement("urlset")
 	// if index is nil(not sitemap index) then parse
 	siteUrls := []string{}
+	fmt.Println(urlSet)
+	fmt.Println(sitemapSet)
 	sitemaps := []*etree.Element{}
-	if set == nil {
-		set = doc.SelectElement("urlset")
-		sitemaps = set.SelectElements("url")
-	} else {
+	if urlSet != nil {
+		sitemaps = urlSet.SelectElements("url")
+	} else if sitemapSet != nil {
 		isSitemapIndex = true
-		sitemaps = set.SelectElements("sitemap")
+		sitemaps = sitemapSet.SelectElements("sitemap")
+	} else {
+		return []string{}, false, errors.New("something wrong string")
 	}
 	for _, sitemap := range sitemaps {
 		loc := sitemap.SelectElement("loc")
