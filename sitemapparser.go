@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -12,15 +11,15 @@ import (
 )
 
 // @return sitemapped url which all
-func scheduler(url string) ([]string, error) {
+func Scheduler(url string) ([]string, error) {
 	// download and parse xml
-	sitemapXML, err := downloader(url)
+	sitemapXML, err := Downloader(url)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	parsedURLs, isSitemap, err := parser(sitemapXML)
+	parsedURLs, isSitemap, err := Parser(sitemapXML)
 
 	if err != nil {
 		log.Fatal(err)
@@ -29,7 +28,7 @@ func scheduler(url string) ([]string, error) {
 	parsedSiteURLs := []string{}
 	if isSitemap {
 		for _, indexURL := range parsedURLs {
-			parsedURLs2, err := scheduler(indexURL)
+			parsedURLs2, err := Scheduler(indexURL)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -44,7 +43,7 @@ func scheduler(url string) ([]string, error) {
 	return parsedURLs, err
 }
 
-func downloader(url string) (string, error) {
+func Downloader(url string) (string, error) {
 	log.Printf("start download: %s", url)
 
 	client := new(http.Client)
@@ -83,7 +82,7 @@ func downloader(url string) (string, error) {
 
 // @str downloaded sitemap
 // @return
-func parser(sitemapXML string) ([]string, bool, error) {
+func Parser(sitemapXML string) ([]string, bool, error) {
 	isSitemapIndex := false
 	xmlStr := sitemapXML
 	doc := etree.NewDocument()
@@ -93,10 +92,7 @@ func parser(sitemapXML string) ([]string, bool, error) {
 	}
 	sitemapSet := doc.SelectElement("sitemapindex")
 	urlSet := doc.SelectElement("urlset")
-	// if index is nil(not sitemap index) then parse
 	siteUrls := []string{}
-	fmt.Println(urlSet)
-	fmt.Println(sitemapSet)
 	sitemaps := []*etree.Element{}
 	if urlSet != nil {
 		sitemaps = urlSet.SelectElements("url")
@@ -104,7 +100,7 @@ func parser(sitemapXML string) ([]string, bool, error) {
 		isSitemapIndex = true
 		sitemaps = sitemapSet.SelectElements("sitemap")
 	} else {
-		return []string{}, false, errors.New("something wrong string")
+		return []string{}, false, errors.New("something wrong string: " + sitemapXML)
 	}
 	for _, sitemap := range sitemaps {
 		loc := sitemap.SelectElement("loc")

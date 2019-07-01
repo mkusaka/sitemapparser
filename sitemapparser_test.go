@@ -1,7 +1,6 @@
 package sitemapparser
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -23,7 +22,7 @@ func TestSitemapIndexParser(t *testing.T) {
   </sitemap>
 </sitemapindex>`
 
-	urls, isSitemapIndex, err := parser(sitemapIndexXML)
+	urls, isSitemapIndex, err := Parser(sitemapIndexXML)
 
 	if isSitemapIndex == false {
 		t.Error("invalid parse: this string is sitemap index.")
@@ -68,7 +67,7 @@ func TestSitemapParser(t *testing.T) {
   </url>
 </urlset>`
 
-	urls, isSitemapIndex, err := parser(sitemapXML)
+	urls, isSitemapIndex, err := Parser(sitemapXML)
 
 	if isSitemapIndex == true {
 		t.Error("invalid parse: this string is not sitemap index.")
@@ -83,6 +82,7 @@ func TestSitemapParser(t *testing.T) {
 	}
 }
 
+/*
 func TestSitemapIndexDonwloader(t *testing.T) {
 	sitemapXML, _ := downloader("some good url for sitemap index")
 
@@ -100,3 +100,14 @@ func TestSitemapDonwloader(t *testing.T) {
 	fmt.Println(isSitemapIndex)
 	fmt.Println(err)
 }
+
+func TestScheduler(t *testing.T) {
+	sitemapURLs, err := Scheduler("some good url")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	fmt.Println(sitemapURLs)
+}
+*/
