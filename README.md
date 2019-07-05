@@ -1,5 +1,5 @@
 # sitemapparser
-download and parse sitemap.
+download and parse (only) gzipped sitemap.
 
 # example
 
